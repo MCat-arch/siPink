@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="dicoding:email" content="khoerunnisautami22@gmail.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Pengguna</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+    
+        #nav-dashboard{
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            background-color: #fff;
+            }
+            #nav-dashboard .navbar-brand{
+                font-family: "Merriweather Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+                font-weight: 700;
+                color: #212529;
+            }
+        .profile-section {
+            margin-top: 120px;
+            padding: 30px;
+            
+
+        }
+
+        .profile-section h2 {
+            margin-bottom: 1em;
+        }
+
+        .profile-info h5 {
+            margin-bottom: 3em;
+        }
+
+        .h3{
+            font-weight: 500;
+            color: rgb(93, 93, 93);
+            margin-top: 2em;
+            margin-bottom: 20px;
+            margin-right: 4em;
+            margin-left: 4em;
+            text-align: justify;
+            background-color: rgb(239, 239, 239);
+            padding: 10px;
+            justify-content: center;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .posts-section {
+            margin-top: 2em;
+        }
+
+        .post-card {
+            margin-bottom: 1em;
+        }
+
+        .post-card .card-body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .post-card .card-body .post-content {
+            flex-grow: 1;
+        }
+
+        .post-card .card-body .post-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sign-out-btn {
+            margin-top: 2em;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-light fixed-top py-3" id="nav-dashboard">
+    <div class="container px-4 px-lg-5">
+        <a class="navbar-brand" href="create-post.html">Si <span class="span-pink">PinK</span></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto my-2 my-lg-0">
+                <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="create-post.html">Create Post</a></li>
+                <li class="nav-item"><a class="nav-link" href="post.html">All Post</a></li>
+                <li class="nav-item"><a class="nav-link disabled" href="#contact">Contact</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" id="sign-out">Sign Out</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<section class="profile-section text-bg-secondary">
+    <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 align-items-center justify-content-center text-center">
+            <h2>Profil Pengguna</h2>
+        </div>
+
+        <div class="row mt-1 p-2 mb-3 profile-info align-items-center justify-content-center text-center">
+            <div class="col-lg-8">
+                <h5> Username : <span id="profile-name"></span></h5>
+                <h5>Addres : <span id="profile-address"></span></h5>
+            </div>
+        </div>
+
+        <hr><h3 class="h3">Riwayat Post</h3>
+        <div class="row mt-4 posts-section" id="user-posts-container">
+            <!-- User posts will be injected here -->
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-lg-8">
+                <button class="btn btn-danger sign-out-btn" id="sign-out-button">Sign Out</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="js/scripts.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fetch current user data and display it
+        function getCurrentUser() {
+            return JSON.parse(localStorage.getItem('currentUser'));
+        }
+
+        function displayUserProfile() {
+            const user = getCurrentUser();
+            if (user) {
+                document.getElementById('profile-name').innerText = user.name;
+                document.getElementById('profile-address').innerText = user.address;
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Load user posts from local storage and display them
+        function loadUserPosts() {
+            const user = getCurrentUser();
+            if (!user) return;
+
+            const posts = JSON.parse(localStorage.getItem('posts')) || [];
+            const userPosts = posts.filter(post => post.userId === user.id);
+            userPosts.forEach(post => addUserPostToPage(post));
+        }
+
+        function addUserPostToPage(post) {
+            const userPostsContainer = document.getElementById('user-posts-container');
+
+            const postCard = document.createElement('div');
+            postCard.className = 'col-md-4 post-card';
+            postCard.id = post.postId;
+
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body';
+
+            const cardTitle = document.createElement('h5');
+            cardTitle.className = 'card-title';
+            cardTitle.innerText = post.reportType.charAt(0).toUpperCase() + post.reportType.slice(1);
+
+            const cardText = document.createElement('p');
+            cardText.className = 'card-text post-content';
+            cardText.innerText = post.content;
+
+            const postFooter = document.createElement('div');
+            postFooter.className = 'post-footer';
+
+            const location = document.createElement('small');
+            location.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${post.location}`;
+
+            const urgency = document.createElement('small');
+            urgency.className = 'text-danger';
+            urgency.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${post.urgencyLevel.charAt(0).toUpperCase() + post.urgencyLevel.slice(1)}`;
+
+            postFooter.appendChild(location);
+            postFooter.appendChild(urgency);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'btn btn-danger btn-sm mt-2';
+            deleteButton.innerText = 'Delete';
+            deleteButton.addEventListener('click', () => {
+                deletePost(post.postId);
+            });
+
+            cardBody.appendChild(cardTitle);
+            cardBody.appendChild(cardText);
+            cardBody.appendChild(postFooter);
+            cardBody.appendChild(deleteButton);
+
+            card.appendChild(cardBody);
+            postCard.appendChild(card);
+
+            userPostsContainer.appendChild(postCard);
+        }
+
+        function deletePost(postId) {
+            const posts = JSON.parse(localStorage.getItem('posts')) || [];
+            const updatedPosts = posts.filter(post => post.postId !== postId);
+            localStorage.setItem('posts', JSON.stringify(updatedPosts));
+
+            // Remove the post from the page
+            const postCard = document.getElementById(postId);
+            if (postCard) {
+                postCard.remove();
+            }
+        }
+
+        // Sign out function
+        document.getElementById('sign-out-button').addEventListener('click', function() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        });
+
+        displayUserProfile();
+        loadUserPosts();
+    });
+</script>
+</body>
+</html>
