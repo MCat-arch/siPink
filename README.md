@@ -13,3 +13,6 @@ selanjutnya pengguna diharapkan dapat memahami jenis laporan sebelum mulai membu
 pengguna dapat posting laporan di halaman create-post, dan postingan tersebut akan tampil di halaman post serta halaman profil pengguna
 
 untuk menyimpan data user dan postingan digunakan koneksi database mongodb atlas
+
+berikut merupakan link website si Pink, di deploy dengan vercel
+https://si-pink-adp3hfreg-mcat-archs-projects.vercel.app/login.html
