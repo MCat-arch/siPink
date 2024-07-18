@@ -20,11 +20,14 @@ jobs:
       - name: install dependencies
         run: npm install
 
-      - name: Install nodemon
-        run: npm install -g nodemon
+      - name: Deploy to Vercel
+        run: |
+          npm install -g vercel
+          vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
-      - name: Build the project
-        run: npm run dev
 
       - name: Deploy to Github Pages
         uses: peaceiris/actions-gh-pages@v3
