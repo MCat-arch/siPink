@@ -37,11 +37,15 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
        
-        async function loginUser(event) {
+    document.addEventListener('DOMContentLoaded', function(){        
+    const signInForm = document.getElementById('loginForm');
+    if (signInForm) {
+        signInForm.addEventListener('submit', async function(event) {
             event.preventDefault();
+    
             const name = document.getElementById('name').value;
             const password = document.getElementById('password').value;
-        
+    
             try {
                 const response = await fetch('/auth/login', {
                     method: 'POST',
@@ -50,27 +54,22 @@
                     },
                     body: JSON.stringify({ name, password })
                 });
-                const data = await response.json();
+                const result = await response.json();
+    
                 if (response.ok) {
-                    alert('Login successful');
-                    // Save user data to local storage or handle it as needed
-                    //localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    alert('Sign in successful!');
                     window.location.href = 'dashboard.html';
                 } else {
-                    alert(data.message);
+                    alert(result.message || 'Invalid credentials');
                 }
             } catch (error) {
                 console.error('Error:', error);
+                alert('Error occurred during sign in');
             }
-        }
-        document.addEventListener('DOMContentLoaded', () => {
-
-            const loginForm = document.getElementById('loginForm');
-            if (loginForm) {
-                loginForm.addEventListener('submit', loginUser);
-            }
-        
-    })
+        });
+    }
+    });
     </script>
 </body>
 </html>

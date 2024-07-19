@@ -20,11 +20,11 @@
 // Function to create a new post
 async function createPost(event) {
     event.preventDefault();
-    const reportType = document.getElementById('reportType').value;
-    const content = document.getElementById('content').value;
+    const reportType = document.getElementById('report-type').value;
+    const content = document.getElementById('post-content').value;
     const location = document.getElementById('location').value;
-    const urgencyLevel = document.getElementById('urgencyLevel').value;
-    const mediaURLs = document.getElementById('mediaURLs').value.split(',');
+    const urgencyLevel = document.getElementById('urgency-level').value;
+    const mediaURLs = document.getElementById('post-media').value.split(',');
 
     try {
         const response = await fetch('/posts/post', {
@@ -36,6 +36,9 @@ async function createPost(event) {
         });
         const data = await response.json();
         alert(data.message);
+        if(response.ok){
+            window.location.href = 'post.html';
+        }
     } catch (error) {
         console.error('Error:', error);
     }
@@ -49,8 +52,135 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    function getCurrentUser() {
+        return JSON.parse(localStorage.getItem('currentUser'));
+    }
+    const user = getCurrentUser();
+    // Function to fetch and display posts
+    async function fetchPosts() {
+        const postsContainer = document.getElementById('posts-container');
+        if (!postsContainer) return;
+
+        try {
+            const response = await fetch('/posts');
+            const posts = await response.json();
+
+            if (response.ok) {
+                postsContainer.innerHTML = ''; // Clear the container
+                posts.forEach(post => {
+                    const postCard = document.createElement('div');
+                    postCard.className = `col-md-4 post-card ${post.reportType} ${post.urgencyLevel} ${post.status}`;
+                    postCard.id = post._id;
+
+                    let mediaHTML = '';
+                    post.mediaURLs.forEach(url => {
+                        mediaHTML += `<img src="${url}" class="img-fluid mt-2" alt="Media">`;
+                    });
+
+                    postCard.innerHTML = `
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Laporan ${post.reportType.charAt(0).toUpperCase() + post.reportType.slice(1)}</h5>
+                                <p class="card-text post-content">${post.content}</p>
+                                <p class="card-text">Posted by: ${user.name}</p>
+                                <div class="post-footer">
+                                    <small><i class="fas fa-map-marker-alt"></i> ${post.location}</small>
+                                    <small class="text-danger"><i class="fas fa-exclamation-circle"></i> ${post.urgencyLevel.charAt(0).toUpperCase() + post.urgencyLevel.slice(1)}</small>
+                                </div>
+                                ${mediaHTML}
+                            </div>
+                        </div>
+                    `;
+                    postsContainer.appendChild(postCard);
+                });
+            } else {
+                alert(posts.message || 'Failed to load posts');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error occurred during fetching posts');
+        }
+    }
+
+    fetchPosts();
+});
 
 /*
+document.addEventListener('DOMContentLoaded', function() {
+    // Assuming you have a way to get the current user ID
+    const userId = 'user-id-from-authentication';
+
+    function fetchUserProfile() {
+        fetch(`/api/profile?userId=${userId}`)
+            .then(response => response.json())
+            .then(user => {
+                if (user) {
+                    displayUserProfile(user);
+                } else {
+                    window.location.href = 'login.html';
+                }
+            })
+            .catch(error => console.error('Error fetching user profile:', error));
+    }
+
+    function displayUserProfile(user) {
+        document.getElementById('profile-name').innerText = user.name;
+        document.getElementById('profile-address').innerText = user.address;
+        user.posts.forEach(post => addUserPostToPage(post));
+        }
+        
+    function addUserPostToPage(post) {
+        const userPostsContainer = document.getElementById('user-posts-container');
+
+        const postCard = document.createElement('div');
+        postCard.className = 'col-md-4 post-card';
+
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const cardBody = document.createElement('div');
+        cardBody.className = 'card-body';
+
+        const cardTitle = document.createElement('h5');
+        cardTitle.className = 'card-title';
+        cardTitle.innerText = post.reportType.charAt(0).toUpperCase() + post.reportType.slice(1);
+
+        const cardText = document.createElement('p');
+        cardText.className = 'card-text post-content';
+        cardText.innerText = post.content;
+
+        const postFooter = document.createElement('div');
+        postFooter.className = 'post-footer';
+
+        const location = document.createElement('small');
+        location.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${post.location}`;
+
+        const urgency = document.createElement('small');
+        urgency.className = 'text-danger';
+        urgency.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${post.urgencyLevel.charAt(0).toUpperCase() + post.urgencyLevel.slice(1)}`;
+
+        postFooter.appendChild(location);
+        postFooter.appendChild(urgency);
+
+        cardBody.appendChild(cardTitle);
+        cardBody.appendChild(cardText);
+        cardBody.appendChild(postFooter);
+
+        card.appendChild(cardBody);
+        postCard.appendChild(card);
+
+        userPostsContainer.appendChild(postCard);
+    }
+
+    // Sign out function
+    document.getElementById('sign-out-button').addEventListener('click', function() {
+        // Implement sign-out functionality, e.g., clear session, redirect to login
+        window.location.href = 'login.html';
+    });
+
+    fetchUserProfile();
+});
 window.addEventListener('DOMContentLoaded', event => {
     // Navbar shrink function
     var navbarShrink = function () {
@@ -93,80 +223,7 @@ window.addEventListener('DOMContentLoaded', event => {
         });
     });
 });
-           
-document.addEventListener('DOMContentLoaded', function() {
-    // Function to handle sign-up form submission
-    const signUpForm = document.getElementById('sign-up-form');
-    if (signUpForm) {
-        signUpForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-
-            const name = document.getElementById('name').value;
-            const address = document.getElementById('address').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                const response = await fetch('/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ name, address, password })
-                });
-                const result = await response.json();
-
-                if (response.ok) {
-                    alert('Sign up successful!');
-                    window.location.href = 'login.html';
-                } else {
-                    alert(result.message || 'Sign up failed');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error occurred during sign up');
-            }
-        });
-    }
-});
-
-//sign in
-
-document.addEventListener('DOMContentLoaded', function(){        
-    const signInForm = document.getElementById('sign-in-form');
-    if (signInForm) {
-        signInForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-    
-            const name = document.getElementById('name').value;
-            const password = document.getElementById('password').value;
-    
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ name, password })
-                });
-                const result = await response.json();
-    
-                if (response.ok) {
-                    localStorage.setItem('currentUser', JSON.stringify(result.user));
-                    alert('Sign in successful!');
-                    window.location.href = 'dashboard.html';
-                } else {
-                    alert(result.message || 'Invalid credentials');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error occurred during sign in');
-            }
-        });
-    }
-    });
-
-
-
+ 
 
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -323,88 +380,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 /*
-    // Function to handle create post form submission
-    const createPostForm = document.getElementById('create-post-form');
-    if (createPostForm) {
-        createPostForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-
-            const reportType = document.getElementById('reportType').value;
-            const content = document.getElementById('content').value;
-            const location = document.getElementById('location').value;
-            const urgencyLevel = document.getElementById('urgencyLevel').value;
-            const mediaURLs = document.getElementById('mediaURLs').value.split(',');
-
-            try {
-                const response = await fetch('/posts', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ reportType, content, location, urgencyLevel, mediaURLs })
-                });
-                const result = await response.json();
-
-                if (response.ok) {
-                    alert('Post created successfully!');
-                    window.location.href = 'post.html';
-                } else {
-                    alert(result.message || 'Post creation failed');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error occurred during post creation');
-            }
-        });
-    }
-});
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    const postForm = document.querySelector('form');
-
-    if (postForm) {
-        postForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const content = document.getElementById('post-content').value;
-            const reportType = document.getElementById('report-type').value;
-            const location = document.getElementById('location').value;
-            const urgencyLevel = document.getElementById('urgency-level').value;
-            const mediaFiles = document.getElementById('post-media').files;
-            const user = JSON.parse(localStorage.getItem('currentUser'));
-
-            const formData = new FormData();
-            formData.append('content', content);
-            formData.append('reportType', reportType);
-            formData.append('location', location);
-            formData.append('urgencyLevel', urgencyLevel);
-            for (let i = 0; i < mediaFiles.length; i++) {
-                formData.append('mediaFiles', mediaFiles[i]);
-            }
-
-            try {
-                const response = await fetch('http://localhost:3000/posts', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${user.token}`
-                    },
-                    body: formData
-                });
-                const result = await response.json();
-
-                if (response.ok) {
-                    alert('Post created successfully!');
-                    window.location.href = 'post.html';
-                } else {
-                    alert(result.message || 'Failed to create post');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error occurred during post creation');
-            }
-        });
-    }
-
+  
     const postsContainer = document.getElementById('posts-container');
 
     if (postsContainer) {
