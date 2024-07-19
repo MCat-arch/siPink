@@ -15,7 +15,7 @@
                 <div class="card mt-5">
                     <div class="card-body">
                         <h3 class="card-title text-center">Sign In</h3>
-                        <form id="sign-in-form">
+                        <form id="loginForm">
                             <div class="form-group">
                                 <label for="name">Name</label>
                                 <input type="text" class="form-control" id="name" required>
@@ -36,40 +36,41 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-document.addEventListener('DOMContentLoaded', function(){        
-const signInForm = document.getElementById('sign-in-form');
-if (signInForm) {
-    signInForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
-
-        const name = document.getElementById('name').value;
-        const password = document.getElementById('password').value;
-
-        try {
-            const response = await fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, password })
-            });
-            const result = await response.json();
-
-            if (response.ok) {
-                localStorage.setItem('currentUser', JSON.stringify(result.user));
-                alert('Sign in successful!');
-                window.location.href = 'dashboard.html';
-            } else {
-                alert(result.message || 'Invalid credentials');
+       
+        async function loginUser(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const password = document.getElementById('password').value;
+        
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, password })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert('Login successful');
+                    // Save user data to local storage or handle it as needed
+                    //localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
             }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error occurred during sign in');
         }
-    });
-}
-});
+        document.addEventListener('DOMContentLoaded', () => {
 
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', loginUser);
+            }
+        
+    })
     </script>
 </body>
 </html>

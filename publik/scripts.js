@@ -8,6 +8,49 @@
 // Scripts
 // 
 
+
+// scripts.js
+// scripts.js
+
+// Function to register a new user
+
+
+// Function to log in a user
+
+// Function to create a new post
+async function createPost(event) {
+    event.preventDefault();
+    const reportType = document.getElementById('reportType').value;
+    const content = document.getElementById('content').value;
+    const location = document.getElementById('location').value;
+    const urgencyLevel = document.getElementById('urgencyLevel').value;
+    const mediaURLs = document.getElementById('mediaURLs').value.split(',');
+
+    try {
+        const response = await fetch('/posts/post', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ reportType, content, location, urgencyLevel, mediaURLs })
+        });
+        const data = await response.json();
+        alert(data.message);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+// Attach event listeners to form submissions
+document.addEventListener('DOMContentLoaded', () => {
+    const postForm = document.getElementById('postForm');
+    if (postForm) {
+        postForm.addEventListener('submit', createPost);
+    }
+});
+
+
+/*
 window.addEventListener('DOMContentLoaded', event => {
     // Navbar shrink function
     var navbarShrink = function () {
@@ -50,6 +93,79 @@ window.addEventListener('DOMContentLoaded', event => {
         });
     });
 });
+           
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to handle sign-up form submission
+    const signUpForm = document.getElementById('sign-up-form');
+    if (signUpForm) {
+        signUpForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const address = document.getElementById('address').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, address, password })
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Sign up successful!');
+                    window.location.href = 'login.html';
+                } else {
+                    alert(result.message || 'Sign up failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error occurred during sign up');
+            }
+        });
+    }
+});
+
+//sign in
+
+document.addEventListener('DOMContentLoaded', function(){        
+    const signInForm = document.getElementById('sign-in-form');
+    if (signInForm) {
+        signInForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+    
+            const name = document.getElementById('name').value;
+            const password = document.getElementById('password').value;
+    
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, password })
+                });
+                const result = await response.json();
+    
+                if (response.ok) {
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    alert('Sign in successful!');
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert(result.message || 'Invalid credentials');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error occurred during sign in');
+            }
+        });
+    }
+    });
+
+
 
 
 
@@ -202,7 +318,7 @@ window.addEventListener('DOMContentLoaded', event => {
         loadUserPosts();
     });
     
-    
+   */ 
 
 
 

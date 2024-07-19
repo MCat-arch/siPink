@@ -1,5 +1,4 @@
 {
-  "$schema": "./schemas.json",
   "name": "nodejs-authentication",
   "version": "1.0.0",
   "description": "Authentication using NodeJS and MongoDB",

@@ -1,12 +1,9 @@
+// server.js
 const express = require('express');
-const mongoose = require('mongoose');
+const connectDB = require('./config/db');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
-const connectDB = require('./config/db');
-const User = require('./models/User');
-const Post = require('./models/Post');
-const bcrypt = require('bcryptjs');
 
 const app = express();
 
@@ -18,84 +15,46 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'publik')));
 
-// Debugging middleware
-app.use((req, res, next) => {
-    console.log(`Request Method: ${req.method}, Request URL: ${req.url}`);
-    next();
-});
-
 // Routes
-app.post('/register', async (req, res) => {
-    const { name, address, password } = req.body;
-    try {
-        const existingUser = await User.findOne({ name });
-        if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
-        }
-        const newUser = new User({ name, address, password });
-        await newUser.save();
-        res.status(201).json({ message: 'User registered successfully' });
-    } catch (err) {
-        res.status(500).json({ message: 'Server error' });
+app.use('/auth', require('./routes/auth'));
+app.use('/posts', require('./routes/posts'));
+app.use('/users', require('./routes/users'));
+
+function isAuthenticated(req, res, next) {
+    const token = req.headers['authorization'];
+    
+    if (!token) {
+        console.log('No token provided');
+        return res.status(401).redirect('/login.html');
     }
-});
 
-app.post('/login', async (req, res) => {
-    const { name, password } = req.body;
-    try {
-        const user = await User.findOne({ name });
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
-        res.status(200).json({ message: 'Login successful', user });
-    } catch (err) {
-        res.status(500).json({ message: 'Server error' });
-    }
-});
+    // Here you should verify the token (e.g., using JWT)
+    // jwt.verify(token, 'your_secret_key', (err, decoded) => {
+    //     if (err) {
+    //         console.log('Token verification failed', err);
+    //         return res.status(401).redirect('/login.html');
+    //     }
+    //     req.user = decoded;
+    //     next();
+    // });
 
+    // For demonstration, let's assume the token is always valid
+    next();
+}
 
-app.post('/post', async (req, res) => {
-    const { reportType, content, location, urgencyLevel, mediaURLs } = req.body;
-    try {
-        const newPost = new Post({ reportType, content, location, urgencyLevel, mediaURLs });
-        await newPost.save();
-        res.status(201).json({ message: 'Post created successfully' });
-    } catch (err) {
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-
-app.get('/post', async (req, res) => {
-    try {
-        const posts = await Post.find();
-        res.json(posts);
-    } catch (err) {
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-
-
-
-// Serve HTML files
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'publik', 'index.html'));
 });
 
-app.get('/login.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'publik', 'login.html'));
+app.get('/profil.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'publik', 'profil.html'));
 });
 
-app.get('/sign-up.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'publik', 'sign-up.html'));
+app.get('/dashboard.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'publik', 'dashboard.html'));
 });
 
-app.get('/post.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'publik', 'post.html'));
+const PORT = process.env.PORT || 2025;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

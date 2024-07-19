@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 const connectDB = async () => {
     try {
-        await mongoose.connect("mongodb+srv://khoerunnisautami22:siPink3000@sipink.d6ouysq.mongodb.net/siPinkDB",{ useNewUrlParser: true, useUnifiedTopology: true }, {
+        await mongoose.connect(process.env.MONGODB_URI, {
             useNewUrlParser: true,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
         });
-        console.log('MongoDB connected');
+        console.log('MongoDB connected successfully');
     } catch (err) {
         console.error(err.message);
         process.exit(1);
@@ -14,3 +15,4 @@ const connectDB = async () => {
 };
 
 module.exports = connectDB;
+
