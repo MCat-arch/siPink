@@ -126,10 +126,8 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="js/scripts.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Fetch current user data and display it
         function getCurrentUser() {
             return JSON.parse(localStorage.getItem('currentUser'));
         }
@@ -137,21 +135,29 @@
         function displayUserProfile() {
             const user = getCurrentUser();
             if (user) {
-                document.getElementById('profile-name').innerText = user.name;
-                document.getElementById('profile-address').innerText = user.address;
+                document.getElementById('profile-name').textContent = user.name;
+                document.getElementById('profile-address').textContent = user.address;
             } else {
                 window.location.href = 'login.html';
             }
         }
 
-        // Load user posts from local storage and display them
-        function loadUserPosts() {
+        async function loadUserPosts() {
             const user = getCurrentUser();
             if (!user) return;
 
-            const posts = JSON.parse(localStorage.getItem('posts')) || [];
-            const userPosts = posts.filter(post => post.userId === user.id);
-            userPosts.forEach(post => addUserPostToPage(post));
+            try {
+                const response = await fetch(`/users/profile/${user.id}/posts`);
+                if (response.ok) {
+                    const posts = await response.json();
+                    posts.forEach(post => addUserPostToPage(post));
+                } else {
+                    alert('Failed to load posts');
+                }
+            } catch (error) {
+                console.error('Error during fetching posts:', error);
+                alert('Error occurred during fetching posts');
+            }
         }
 
         function addUserPostToPage(post) {
@@ -159,7 +165,7 @@
 
             const postCard = document.createElement('div');
             postCard.className = 'col-md-4 post-card';
-            postCard.id = post.postId;
+            postCard.id = post.id;
 
             const card = document.createElement('div');
             card.className = 'card';
@@ -192,7 +198,7 @@
             deleteButton.className = 'btn btn-danger btn-sm mt-2';
             deleteButton.innerText = 'Delete';
             deleteButton.addEventListener('click', () => {
-                deletePost(post.postId);
+                deletePost(post.id);
             });
 
             cardBody.appendChild(cardTitle);
@@ -206,19 +212,29 @@
             userPostsContainer.appendChild(postCard);
         }
 
-        function deletePost(postId) {
-            const posts = JSON.parse(localStorage.getItem('posts')) || [];
-            const updatedPosts = posts.filter(post => post.postId !== postId);
-            localStorage.setItem('posts', JSON.stringify(updatedPosts));
+        async function deletePost(postId) {
+            const user = getCurrentUser();
+            if (!user) return;
 
-            // Remove the post from the page
-            const postCard = document.getElementById(postId);
-            if (postCard) {
-                postCard.remove();
+            try {
+                const response = await fetch(`/users/profile/${user.id}/posts/${postId}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    const postCard = document.getElementById(postId);
+                    if (postCard) {
+                        postCard.remove();
+                    }
+                    alert('Post deleted successfully');
+                } else {
+                    alert('Failed to delete post');
+                }
+            } catch (error) {
+                console.error('Error during post deletion:', error);
+                alert('Error occurred during deleting post');
             }
         }
 
-        // Sign out function
         document.getElementById('sign-out-button').addEventListener('click', function() {
             localStorage.removeItem('currentUser');
             window.location.href = 'login.html';
@@ -228,5 +244,7 @@
         loadUserPosts();
     });
 </script>
+
+
 </body>
 </html>

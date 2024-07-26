@@ -5,10 +5,10 @@ const router = express.Router();
 
 // Create new post
 router.post('/post', async (req, res) => {
-    const { reportType, content, location, urgencyLevel, mediaURLs } = req.body;
+    const { reportType, content, location, urgencyLevel, mediaURLs, status, userId } = req.body;
 
     try {
-        const newPost = new Post({ reportType, content, location, urgencyLevel, mediaURLs });
+        const newPost = new Post({ reportType, content, location, urgencyLevel, mediaURLs, status, userId });
         await newPost.save();
         res.status(201).json({ message: 'Post created successfully' });
     } catch (error) {

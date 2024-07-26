@@ -106,6 +106,10 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchPosts();
 });
 
+// USER PROFIL
+
+
+
 /*
 document.addEventListener('DOMContentLoaded', function() {
     // Assuming you have a way to get the current user ID
