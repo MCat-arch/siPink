@@ -20,6 +20,7 @@ app.use('/auth', require('./routes/auth'));
 app.use('/posts', require('./routes/posts'));
 app.use('/users', require('./routes/users'));
 
+/*
 function isAuthenticated(req, res, next) {
     const token = req.headers['authorization'];
     
@@ -41,6 +42,7 @@ function isAuthenticated(req, res, next) {
     // For demonstration, let's assume the token is always valid
     next();
 }
+*/
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'publik', 'index.html'));
